@@ -1,0 +1,2033 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SiLaju - Sistem Peminjaman Kendaraan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #00bcd4;
+            --primary-dark: #0097a7;
+            --secondary: #006064;
+            --dark: #1e293b;
+            --light: #e0f7fa;
+            --gray: #64748b;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            overflow: hidden;
+        }
+
+        /* ===== LOGIN PAGE ===== */
+        .login-page {
+            background: linear-gradient(135deg, #00bcd4 0%, #00e5ff 50%, #0097a7 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            overflow-y: auto;
+        }
+
+        .login-page.hidden {
+            display: none;
+        }
+
+        .bg-animation {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .road {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(to bottom, #2c3e50 0%, #34495e 100%);
+        }
+
+        .road-line {
+            position: absolute;
+            bottom: 75px;
+            width: 100%;
+            height: 5px;
+            background: repeating-linear-gradient(to right, white 0px, white 30px, transparent 30px, transparent 60px);
+            animation: roadMove 2s linear infinite;
+        }
+
+        @keyframes roadMove {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-60px);
+            }
+        }
+
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 100px;
+            animation: cloudFloat 20s linear infinite;
+        }
+
+        .cloud:nth-child(1) {
+            width: 100px;
+            height: 40px;
+            top: 20%;
+            left: -100px;
+            animation-duration: 25s;
+        }
+
+        .cloud:nth-child(2) {
+            width: 150px;
+            height: 50px;
+            top: 40%;
+            left: -150px;
+            animation-duration: 30s;
+            animation-delay: 5s;
+        }
+
+        .cloud:nth-child(3) {
+            width: 120px;
+            height: 45px;
+            top: 60%;
+            left: -120px;
+            animation-duration: 35s;
+            animation-delay: 10s;
+        }
+
+        @keyframes cloudFloat {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(calc(100vw + 200px));
+            }
+        }
+
+        .car-container {
+            position: absolute;
+            bottom: 180px;
+            left: 15%;
+            animation: carBounce 0.5s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        @keyframes carBounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .car {
+            width: 120px;
+            height: 60px;
+            position: relative;
+        }
+
+        .car-body {
+            width: 100%;
+            height: 35px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 10px 10px 5px 5px;
+            position: relative;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .car-top {
+            width: 60%;
+            height: 25px;
+            background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
+            border-radius: 8px 8px 0 0;
+            position: absolute;
+            top: -20px;
+            left: 20%;
+        }
+
+        .car-window {
+            width: 20px;
+            height: 15px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 3px;
+            position: absolute;
+            top: 3px;
+        }
+
+        .car-window.left {
+            left: 8px;
+        }
+
+        .car-window.right {
+            right: 8px;
+        }
+
+        .car-light {
+            width: 8px;
+            height: 6px;
+            background: #ffeb3b;
+            border-radius: 2px;
+            position: absolute;
+            top: 15px;
+            box-shadow: 0 0 10px #ffeb3b;
+        }
+
+        .car-light.front {
+            right: 2px;
+        }
+
+        .car-light.back {
+            left: 2px;
+            background: #f44336;
+            box-shadow: 0 0 10px #f44336;
+        }
+
+        .wheel {
+            width: 20px;
+            height: 20px;
+            background: #2c3e50;
+            border-radius: 50%;
+            position: absolute;
+            bottom: -10px;
+            border: 3px solid #34495e;
+            animation: wheelRotate 0.5s linear infinite;
+        }
+
+        .wheel.front {
+            right: 15px;
+        }
+
+        .wheel.back {
+            left: 15px;
+        }
+
+        @keyframes wheelRotate {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .login-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 3rem 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo-container {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0, 188, 212, 0.4);
+            animation: logoPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes logoPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .logo-container svg {
+            width: 45px;
+            height: 45px;
+            fill: white;
+        }
+
+        .login-header h1 {
+            font-size: 2rem;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .tab-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 2rem;
+            background: #f0f0f0;
+            padding: 5px;
+            border-radius: 10px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            color: #666;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(0, 188, 212, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 188, 212, 0.3);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 188, 212, 0.4);
+        }
+
+        .error-msg {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            display: none;
+            border-left: 4px solid #c62828;
+        }
+
+        .info-text {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        /* ===== USER PAGE ===== */
+        .app-page {
+            display: none;
+            background: var(--light);
+            min-height: 100vh;
+        }
+
+        .app-page.active {
+            display: block;
+        }
+
+        .user-hero {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .user-hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+        }
+
+        .user-hero p {
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+
+        .user-stats {
+            max-width: 1200px;
+            margin: -3rem auto 3rem;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            opacity: 0;
+            transform: translateY(60px) scale(0.8);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .stat-card.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-15px) rotateY(5deg) scale(1.05);
+            box-shadow: 0 25px 60px rgba(0, 188, 212, 0.4);
+        }
+
+        .stat-card:active {
+            transform: translateY(-10px) scale(0.98);
+        }
+
+        .icon-3d {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover .icon-3d {
+            transform: scale(1.2) translateZ(30px);
+        }
+
+        .car-icon {
+            animation: carMove 3s ease-in-out infinite;
+        }
+
+        @keyframes carMove {
+
+            0%,
+            100% {
+                transform: translateX(-15px) translateZ(20px);
+            }
+
+            50% {
+                transform: translateX(15px) translateZ(20px);
+            }
+        }
+
+        .stat-card:hover .car-icon {
+            animation: carJump 0.6s ease-in-out;
+        }
+
+        @keyframes carJump {
+
+            0%,
+            100% {
+                transform: translateY(0) scale(1);
+            }
+
+            25% {
+                transform: translateY(-30px) scale(1.1) rotate(-5deg);
+            }
+
+            50% {
+                transform: translateY(0) scale(1.05) rotate(5deg);
+            }
+
+            75% {
+                transform: translateY(-15px) scale(1.08) rotate(-3deg);
+            }
+        }
+
+        .car-icon svg {
+            filter: drop-shadow(0 10px 20px rgba(0, 188, 212, 0.4));
+            transition: filter 0.3s;
+        }
+
+        .stat-card:hover .car-icon svg {
+            filter: drop-shadow(0 15px 30px rgba(0, 188, 212, 0.6));
+        }
+
+        .wheel-icon {
+            animation: wheelSpin 2s linear infinite;
+        }
+
+        @keyframes wheelSpin {
+            0% {
+                transform: rotate(0deg) translateZ(20px);
+            }
+
+            100% {
+                transform: rotate(360deg) translateZ(20px);
+            }
+        }
+
+        .stat-card:hover .wheel-icon {
+            animation: wheelSpinFast 0.5s linear infinite;
+        }
+
+        @keyframes wheelSpinFast {
+            0% {
+                transform: rotate(0deg) translateZ(20px) scale(1);
+            }
+
+            100% {
+                transform: rotate(720deg) translateZ(20px) scale(1.15);
+            }
+        }
+
+        .wheel-icon svg {
+            filter: drop-shadow(0 10px 20px rgba(0, 188, 212, 0.4));
+        }
+
+        .check-icon {
+            animation: checkBounce 1.5s ease-in-out infinite;
+        }
+
+        @keyframes checkBounce {
+
+            0%,
+            100% {
+                transform: translateY(0) translateZ(20px) scale(1);
+            }
+
+            25% {
+                transform: translateY(-20px) translateZ(30px) scale(1.1);
+            }
+
+            50% {
+                transform: translateY(0) translateZ(20px) scale(1);
+            }
+
+            75% {
+                transform: translateY(-10px) translateZ(25px) scale(1.05);
+            }
+        }
+
+        .stat-card:hover .check-icon {
+            animation: checkPop 0.6s ease-in-out;
+        }
+
+        @keyframes checkPop {
+
+            0%,
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            25% {
+                transform: scale(1.3) rotate(10deg);
+            }
+
+            50% {
+                transform: scale(1.1) rotate(-10deg);
+            }
+
+            75% {
+                transform: scale(1.25) rotate(5deg);
+            }
+        }
+
+        .check-icon svg {
+            filter: drop-shadow(0 10px 20px rgba(0, 188, 212, 0.4));
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover .stat-number {
+            font-size: 2.5rem;
+            color: var(--primary-dark);
+            text-shadow: 0 5px 15px rgba(0, 188, 212, 0.3);
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .logout-button {
+            background: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .logout-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 3rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        th,
+        td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        th {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        tbody tr {
+            transition: all 0.3s;
+        }
+
+        tbody tr:nth-child(odd) {
+            background: #f8f9fa;
+        }
+
+        tbody tr:hover {
+            background: linear-gradient(90deg, rgba(0, 188, 212, 0.1), rgba(0, 151, 167, 0.1));
+            transform: scale(1.01);
+        }
+
+        td {
+            color: var(--dark);
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .form-container {
+            max-width: 700px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        .form-container input,
+        .form-container select,
+        .form-container textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .form-container input:focus,
+        .form-container select:focus,
+        .form-container textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
+        }
+
+        .form-container input[type="file"] {
+            border: 2px dashed var(--primary);
+            padding: 15px;
+            background: rgba(0, 188, 212, 0.05);
+        }
+
+        .form-container button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .form-container button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 188, 212, 0.4);
+        }
+
+        .success-msg {
+            background: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        /* ===== ADMIN PAGE ===== */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 15px 35px rgba(0, 188, 212, 0.3);
+        }
+
+        .stat-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 15px;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .stat-box h3 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .stat-box p {
+            color: #666;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .actions {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+
+        .actions h2 {
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-right: 10px;
+            color: white;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .vehicle-management {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+
+        .vehicle-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .vehicle-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.3s;
+        }
+
+        .vehicle-card.available {
+            border-color: #4caf50;
+            background: #f1f8f4;
+        }
+
+        .vehicle-card.unavailable {
+            border-color: #f44336;
+            background: #fef5f5;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            background: var(--secondary);
+            color: white;
+            padding: 1rem 1.5rem;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-returned {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .btn-approve {
+            background: #4caf50;
+        }
+
+        .btn-reject {
+            background: #f44336;
+        }
+
+        .btn-view {
+            background: #2196f3;
+        }
+
+        .btn-return {
+            background: #ff9800;
+        }
+
+        .btn-delete {
+            background: #ff5722;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 3% auto;
+            padding: 0;
+            border-radius: 12px;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            background: var(--primary);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 2rem;
+            border-top: 1px solid #e0e0e0;
+            text-align: right;
+        }
+
+        .close {
+            float: right;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+        }
+
+        .detail-row {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .car-container {
+                left: 5%;
+                transform: scale(0.8);
+            }
+
+            .login-container {
+                padding: 2rem 1.5rem;
+            }
+
+            .user-hero h1 {
+                font-size: 2rem;
+            }
+
+            .user-hero p {
+                font-size: 1.2rem;
+            }
+
+            .user-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- LOGIN PAGE -->
+    <div id="loginPage" class="login-page">
+        <div class="bg-animation">
+            <div class="cloud"></div>
+            <div class="cloud"></div>
+            <div class="cloud"></div>
+            <div class="road">
+                <div class="road-line"></div>
+            </div>
+        </div>
+
+        <div class="car-container">
+            <div class="car">
+                <div class="car-top">
+                    <div class="car-window left"></div>
+                    <div class="car-window right"></div>
+                </div>
+                <div class="car-body">
+                    <div class="car-light front"></div>
+                    <div class="car-light back"></div>
+                </div>
+                <div class="wheel front"></div>
+                <div class="wheel back"></div>
+            </div>
+        </div>
+
+        <div class="login-wrapper">
+            <div class="login-container">
+                <div class="login-header">
+                    <div class="logo-container">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z" />
+                        </svg>
+                    </div>
+                    <h1>🚗 SiLaju</h1>
+                    <p>Sistem Layanan Peminjaman Kendaraan</p>
+                </div>
+
+                <div class="tab-container">
+                    <button class="tab-btn active" onclick="switchTab('user')">👤 User</button>
+                    <button class="tab-btn" onclick="switchTab('admin')">🔐 Admin</button>
+                </div>
+
+                <div class="error-msg" id="errorMsg"></div>
+
+                <form id="userLoginForm" onsubmit="loginUser(event)">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <div class="input-wrapper">
+                            <input type="email" id="userEmail" placeholder="Masukkan email Anda" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="login-btn">Masuk sebagai User</button>
+                    <p class="info-text">User dapat melihat data dan melakukan reservasi kendaraan</p>
+                </form>
+
+                <form id="adminLoginForm" style="display: none;" onsubmit="loginAdmin(event)">
+                    <div class="form-group">
+                        <label>Email Admin</label>
+                        <div class="input-wrapper">
+                            <input type="email" id="adminEmail" placeholder="silaju09@gmail.com" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="adminPassword" placeholder="Masukkan password" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="login-btn">Masuk sebagai Admin</button>
+                    <p class="info-text">Admin dapat mengelola semua permohonan peminjaman</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- USER PAGE -->
+    <div id="userPage" class="app-page">
+        <div class="user-hero">
+            <h1>🚗 SiLaju</h1>
+            <p>Sistem Layanan Peminjaman Kendaraan Unit</p>
+        </div>
+
+        <div class="user-stats">
+            <div class="stat-card">
+                <div class="icon-3d car-icon">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="carGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00e5ff;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#00bcd4;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <rect x="15" y="45" width="70" height="25" rx="5" fill="url(#carGradient)" />
+                        <path d="M 25 45 L 35 30 L 65 30 L 75 45 Z" fill="url(#carGradient)" />
+                        <rect x="38" y="33" width="12" height="10" rx="2" fill="#80deea" opacity="0.6" />
+                        <rect x="52" y="33" width="12" height="10" rx="2" fill="#80deea" opacity="0.6" />
+                        <circle cx="30" cy="70" r="8" fill="#37474f" />
+                        <circle cx="30" cy="70" r="5" fill="#546e7a" />
+                        <circle cx="70" cy="70" r="8" fill="#37474f" />
+                        <circle cx="70" cy="70" r="5" fill="#546e7a" />
+                        <circle cx="20" cy="52" r="3" fill="#ffeb3b" />
+                        <circle cx="80" cy="52" r="3" fill="#f44336" />
+                        <rect x="45" y="50" width="10" height="3" rx="1" fill="#80deea" />
+                    </svg>
+                </div>
+                <div class="stat-number">35</div>
+                <div class="stat-label">Total Kendaraan Setda</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="icon-3d wheel-icon">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="wheelGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00e5ff;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#00bcd4;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#0097a7;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="50" cy="50" r="40" fill="url(#wheelGradient)" stroke="#006064" stroke-width="3" />
+                        <line x1="50" y1="50" x2="50" y2="10" stroke="#006064" stroke-width="3" />
+                        <line x1="50" y1="50" x2="85" y2="25" stroke="#006064" stroke-width="3" />
+                        <line x1="50" y1="50" x2="85" y2="75" stroke="#006064" stroke-width="3" />
+                        <line x1="50" y1="50" x2="50" y2="90" stroke="#006064" stroke-width="3" />
+                        <line x1="50" y1="50" x2="15" y2="75" stroke="#006064" stroke-width="3" />
+                        <line x1="50" y1="50" x2="15" y2="25" stroke="#006064" stroke-width="3" />
+                        <circle cx="50" cy="50" r="8" fill="#00e5ff" />
+                    </svg>
+                </div>
+                <div class="stat-number" id="userSedangDipinjam">0</div>
+                <div class="stat-label">Sedang Dipinjam</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="icon-3d check-icon">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="checkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00e5ff;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#00bcd4;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="50" cy="50" r="40" fill="url(#checkGradient)" />
+                        <path d="M 30 50 L 43 65 L 70 35" fill="none" stroke="white" stroke-width="8"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <div class="stat-number" id="userTersedia">0</div>
+                <div class="stat-label">Dapat Dipinjam</div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div style="text-align: right; margin-bottom: 1rem;">
+                <button class="logout-button" onclick="logout()">🚪 Logout</button>
+            </div>
+
+            <h2 class="section-title">Data Pinjam Kendaraan</h2>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama</th>
+                            <th>Instansi</th>
+                            <th>Kendaraan</th>
+                            <th>Tanggal</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userDataTable">
+                        <tr>
+                            <td colspan="6" style="text-align:center;">Memuat data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 class="section-title" style="margin-top: 3rem;">Reservasi Kendaraan</h2>
+            <div class="success-msg" id="userSuccessMsg">✓ Permohonan berhasil dikirim!</div>
+
+            <div class="form-container">
+                <form id="userReservasiForm">
+                    <label>Email *</label>
+                    <input type="email" name="email" required>
+
+                    <label>Nama Lengkap *</label>
+                    <input type="text" name="nama" required>
+
+                    <label>Upload KTP * (JPG/PNG/PDF, Max 5MB)</label>
+                    <input type="file" id="userKtpFile" accept=".jpg,.jpeg,.png,.pdf" required>
+
+                    <label>OPD/Instansi *</label>
+                    <input type="text" name="instansi" required>
+
+                    <input type="hidden" name="jabatan" value="Instansi/OPD Umum">
+
+                    <label>Pilih Kendaraan *</label>
+                    <select name="kendaraan" id="userKendaraanSelect" required>
+                        <option value="">-- Memuat kendaraan tersedia --</option>
+                    </select>
+                    <p style="font-size: 0.85rem; color: #666; margin-top: -10px; margin-bottom: 15px;">
+                        💡 Menampilkan kendaraan yang dapat dipinjam saat ini
+                    </p>
+
+                    <label>Lama Pinjam *</label>
+                    <input type="text" name="lamaPinjam" placeholder="Contoh: 2 hari" required>
+
+                    <label>Tanggal & Jam Ambil *</label>
+                    <input type="datetime-local" name="tanggalAmbil" required>
+
+                    <label>Tanggal & Jam Kembali *</label>
+                    <input type="datetime-local" name="tanggalKembali" required>
+
+                    <label>Kegiatan/Acara *</label>
+                    <textarea name="kegiatan" rows="4" required></textarea>
+
+                    <label>No HP *</label>
+                    <input type="tel" name="noHp" placeholder="08xxxxxxxxxx" required>
+
+                    <label>Upload Surat Permohonan * (PDF, Max 5MB)</label>
+                    <div
+                        style="background:#e1f5fe;border-left:4px solid var(--primary);padding:12px;margin-bottom:15px;border-radius:6px;">
+                        <p style="margin:0;font-size:0.9rem;">📄 <strong>Download Template:</strong> <a
+                                href="https://bit.ly/SuratPermohonanPeminjamanKendaraan" target="_blank"
+                                style="color:var(--primary);font-weight:600;">Klik di sini</a></p>
+                    </div>
+                    <input type="file" id="userSuratFile" accept=".pdf" required>
+
+                    <button type="submit" id="userSubmitBtn">Kirim Permohonan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN PAGE -->
+    <div id="adminPage" class="app-page">
+        <div class="header">
+            <div class="header-content">
+                <div>
+                    <h1>🚗 SiLaju Admin Dashboard</h1>
+                    <p>Kelola Permohonan Peminjaman Kendaraan</p>
+                </div>
+                <button class="logout-button" onclick="logout()">🚪 Logout</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="docGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#00e5ff;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#00bcd4;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <rect x="25" y="15" width="50" height="70" rx="3" fill="url(#docGradient)" />
+                            <rect x="25" y="15" width="50" height="10" fill="#0097a7" />
+                            <line x1="35" y1="35" x2="65" y2="35" stroke="white" stroke-width="2" />
+                            <line x1="35" y1="45" x2="65" y2="45" stroke="white" stroke-width="2" />
+                            <line x1="35" y1="55" x2="55" y2="55" stroke="white" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <h3 id="adminTotalPermohonan">0</h3>
+                    <p>Total Permohonan</p>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="hourglassGradient">
+                                    <stop offset="0%" style="stop-color:#ffd54f" />
+                                    <stop offset="100%" style="stop-color:#ffb300" />
+                                </linearGradient>
+                            </defs>
+                            <rect x="30" y="15" width="40" height="8" rx="2" fill="#ff9800" />
+                            <path d="M 35 23 L 50 50 L 65 23 Z" fill="url(#hourglassGradient)" opacity="0.3" />
+                            <path d="M 35 77 L 50 50 L 65 77 Z" fill="url(#hourglassGradient)" />
+                            <rect x="30" y="77" width="40" height="8" rx="2" fill="#ff9800" />
+                        </svg>
+                    </div>
+                    <h3 id="adminMenunggu">0</h3>
+                    <p>Menunggu Persetujuan</p>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="approveGradient">
+                                    <stop offset="0%" style="stop-color:#66bb6a" />
+                                    <stop offset="100%" style="stop-color:#43a047" />
+                                </linearGradient>
+                            </defs>
+                            <circle cx="50" cy="50" r="35" fill="url(#approveGradient)" />
+                            <path d="M 32 50 L 45 65 L 70 35" fill="none" stroke="white" stroke-width="6"
+                                stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <h3 id="adminDisetujui">0</h3>
+                    <p>Disetujui</p>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="rejectGradient">
+                                    <stop offset="0%" style="stop-color:#ef5350" />
+                                    <stop offset="100%" style="stop-color:#e53935" />
+                                </linearGradient>
+                            </defs>
+                            <circle cx="50" cy="50" r="35" fill="url(#rejectGradient)" />
+                            <path d="M 35 35 L 65 65" stroke="white" stroke-width="6" stroke-linecap="round" />
+                            <path d="M 65 35 L 35 65" stroke="white" stroke-width="6" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <h3 id="adminDitolak">0</h3>
+                    <p>Ditolak</p>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="returnGradient">
+                                    <stop offset="0%" style="stop-color:#42a5f5" />
+                                    <stop offset="100%" style="stop-color:#1976d2" />
+                                </linearGradient>
+                            </defs>
+                            <circle cx="50" cy="50" r="35" fill="url(#returnGradient)" />
+                            <path d="M 60 30 L 40 50 L 60 70" fill="none" stroke="white" stroke-width="6"
+                                stroke-linecap="round" />
+                            <path d="M 40 50 L 65 50" fill="none" stroke="white" stroke-width="6"
+                                stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <h3 id="adminDikembalikan">0</h3>
+                    <p>Dikembalikan</p>
+                </div>
+            </div>
+
+            <div class="actions">
+                <h2>Aksi Cepat</h2>
+                <button class="btn btn-primary" onclick="exportToExcel()">📊 Export ke Excel</button>
+                <button class="btn btn-primary" onclick="refreshAdminData()">🔄 Refresh Data</button>
+            </div>
+
+            <div class="vehicle-management">
+                <h2>🚙 Manajemen Ketersediaan Kendaraan (<span id="adminTotalVehicles">35</span> Unit)</h2>
+                <p style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">Tandai kendaraan yang sedang dipinjam
+                    agar peminjam dapat melihat ketersediaan real-time</p>
+
+                <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+                    <input type="text" id="adminNewVehicleName" placeholder="Masukkan nama kendaraan baru..."
+                        style="flex: 1; padding: 10px; border: 2px solid var(--primary); border-radius: 6px;">
+                    <button class="btn btn-primary" onclick="addVehicle()" style="margin: 0;">➕ Tambah
+                        Kendaraan</button>
+                </div>
+
+                <div id="adminVehicleGrid" class="vehicle-grid">
+                    <div style="text-align: center; padding: 2rem; color: #999;">⏳ Memuat data kendaraan...</div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-header">
+                    <h2>Daftar Permohonan Peminjaman</h2>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Tanggal Submit</th>
+                            <th>Nama</th>
+                            <th>Instansi</th>
+                            <th>Kendaraan</th>
+                            <th>Tanggal Pinjam</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminDataTable">
+                        <tr>
+                            <td colspan="8" style="text-align:center;">Memuat data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2>Detail Permohonan</h2>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-approve" onclick="approveRequest()">✓ Setujui</button>
+                <button class="btn btn-reject" onclick="rejectRequest()">✗ Tolak</button>
+                <button class="btn btn-return" onclick="returnVehicle()">↩ Kembalikan</button>
+                <button class="btn" onclick="closeModal()">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwRM8Y4elOuzGf1JmaytFk6TZNvbWhI-zEuKZbhRoujlqquGe7t20oHu67YedZN9YvLFQ/exec';
+        const ADMIN_EMAIL = 'silaju09@gmail.com';
+        const ADMIN_PASSWORD = 'silaju_2025';
+        let currentUser = null;
+        let currentData = [];
+        let selectedRow = null;
+        let vehicleAvailability = {};
+        let ALL_VEHICLES = [];
+
+        function switchTab(tab) {
+            const userForm = document.getElementById('userLoginForm');
+            const adminForm = document.getElementById('adminLoginForm');
+            const tabs = document.querySelectorAll('.tab-btn');
+            document.getElementById('errorMsg').style.display = 'none';
+            tabs.forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            if (tab === 'user') {
+                userForm.style.display = 'block';
+                adminForm.style.display = 'none';
+            } else {
+                userForm.style.display = 'none';
+                adminForm.style.display = 'block';
+            }
+        }
+
+        function showError(message) {
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.textContent = message;
+            errorMsg.style.display = 'block';
+            setTimeout(() => errorMsg.style.display = 'none', 3000);
+        }
+
+        function loginUser(event) {
+            event.preventDefault();
+            const email = document.getElementById('userEmail').value;
+            if (!email) {
+                showError('Email harus diisi!');
+                return;
+            }
+            currentUser = { type: 'user', email: email };
+            showUserPage();
+        }
+
+        function loginAdmin(event) {
+            event.preventDefault();
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+                showError('❌ Email atau password admin salah!');
+                return;
+            }
+            currentUser = { type: 'admin', email: email };
+            showAdminPage();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('userPage').classList.remove('active');
+            document.getElementById('adminPage').classList.remove('active');
+            document.getElementById('userEmail').value = '';
+            document.getElementById('adminEmail').value = '';
+            document.getElementById('adminPassword').value = '';
+            document.body.style.overflow = 'hidden';
+            window.scrollTo(0, 0);
+        }
+
+        function showUserPage() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('userPage').classList.add('active');
+            document.body.style.overflow = 'auto';
+            loadUserData();
+
+            setTimeout(() => {
+                document.querySelectorAll('.stat-card').forEach(card => {
+                    card.classList.add('show');
+                });
+            }, 100);
+        }
+
+        function showAdminPage() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('adminPage').classList.add('active');
+            document.body.style.overflow = 'auto';
+            loadAdminData();
+        }
+
+        async function loadUserData() {
+            await loadUserTable();
+            await updateUserStats();
+            await updateUserVehicleDropdown();
+        }
+
+        async function loadUserTable() {
+            try {
+                const response = await fetch(SCRIPT_URL + '?action=getData');
+                const data = await response.json();
+                const tbody = document.getElementById('userDataTable');
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Belum ada data</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.map((row, i) => {
+                    let statusColor = '#999';
+                    let statusText = row.status;
+                    switch (row.status) {
+                        case 'Disetujui': statusColor = '#00bcd4'; statusText = '✓ Disetujui'; break;
+                        case 'Ditolak': statusColor = '#f44336'; statusText = '✗ Ditolak'; break;
+                        case 'Dikembalikan': statusColor = '#2196f3'; statusText = '↩ Dikembalikan'; break;
+                        case 'Menunggu': statusColor = '#ff9800'; statusText = '⏱ Menunggu'; break;
+                    }
+                    return `<tr><td>${i + 1}</td><td>${row.nama}</td><td>${row.instansi}</td><td>${row.kendaraan.substring(0, 40)}...</td><td>${row.tanggalAmbil}</td><td><span style="background:${statusColor};color:white;padding:6px 16px;border-radius:20px;font-weight:600;display:inline-block;">${statusText}</span></td></tr>`;
+                }).join('');
+            } catch (error) {
+                document.getElementById('userDataTable').innerHTML = '<tr><td colspan="6" style="text-align:center;">Gagal memuat data</td></tr>';
+            }
+        }
+
+        async function updateUserStats() {
+            try {
+                const response = await fetch(SCRIPT_URL + '?action=getAdminData');
+                const data = await response.json();
+                const dipinjam = data.filter(d => d.status === 'Disetujui').length;
+                document.getElementById('userSedangDipinjam').textContent = dipinjam;
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function updateUserVehicleDropdown() {
+            try {
+                const [adminResponse, statusResponse] = await Promise.all([
+                    fetch(SCRIPT_URL + '?action=getAdminData'),
+                    fetch(SCRIPT_URL + '?action=getVehicleStatus')
+                ]);
+                const adminData = await adminResponse.json();
+                const statusData = await statusResponse.json();
+                if (statusData.success && statusData.vehicleList) {
+                    ALL_VEHICLES = statusData.vehicleList;
+                }
+                const borrowedVehicles = adminData.filter(d => d.status === 'Disetujui').map(d => d.kendaraan);
+                const manuallyUnavailable = [];
+                if (statusData.success && statusData.vehicles) {
+                    Object.keys(statusData.vehicles).forEach(vehicle => {
+                        if (statusData.vehicles[vehicle] === false) {
+                            manuallyUnavailable.push(vehicle);
+                        }
+                    });
+                }
+                const unavailableVehicles = [...new Set([...borrowedVehicles, ...manuallyUnavailable])];
+                const availableVehicles = ALL_VEHICLES.filter(v => !unavailableVehicles.includes(v));
+                const select = document.getElementById('userKendaraanSelect');
+                select.innerHTML = '<option value="">-- Pilih Kendaraan --</option>';
+                if (availableVehicles.length === 0) {
+                    select.innerHTML += '<option value="" disabled>⚠️ Semua kendaraan sedang dipinjam</option>';
+                } else {
+                    availableVehicles.forEach(vehicle => {
+                        const option = document.createElement('option');
+                        option.value = vehicle;
+                        option.textContent = vehicle;
+                        select.appendChild(option);
+                    });
+                }
+                document.getElementById('userTersedia').textContent = availableVehicles.length;
+            } catch (error) {
+                console.error('Error updating vehicles:', error);
+            }
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        document.getElementById('userReservasiForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btn = document.getElementById('userSubmitBtn');
+            btn.disabled = true;
+            btn.innerHTML = 'Mengunggah... ⏳';
+            try {
+                const ktpFile = document.getElementById('userKtpFile').files[0];
+                const suratFile = document.getElementById('userSuratFile').files[0];
+                if (ktpFile.size > 5242880) {
+                    alert('File KTP terlalu besar! Max 5MB');
+                    btn.disabled = false;
+                    btn.innerHTML = 'Kirim Permohonan';
+                    return;
+                }
+                if (suratFile.size > 5242880) {
+                    alert('File Surat terlalu besar! Max 5MB');
+                    btn.disabled = false;
+                    btn.innerHTML = 'Kirim Permohonan';
+                    return;
+                }
+                const ktpBase64 = await fileToBase64(ktpFile);
+                const suratBase64 = await fileToBase64(suratFile);
+                const formData = new FormData(this);
+                formData.append('ktpFile', ktpBase64);
+                formData.append('ktpName', ktpFile.name);
+                formData.append('ktpType', ktpFile.type);
+                formData.append('suratFile', suratBase64);
+                formData.append('suratName', suratFile.name);
+                formData.append('suratType', suratFile.type);
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('userSuccessMsg').style.display = 'block';
+                    this.reset();
+                    setTimeout(() => document.getElementById('userSuccessMsg').style.display = 'none', 5000);
+                    loadUserData();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    alert('Gagal: ' + (result.error || 'Coba lagi'));
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Kirim Permohonan';
+            }
+        });
+
+        async function loadAdminData() {
+            await loadAdminTable();
+            await loadVehicleAvailability();
+        }
+
+        async function loadAdminTable() {
+            try {
+                const response = await fetch(SCRIPT_URL + '?action=getAdminData');
+                currentData = await response.json();
+                updateAdminStats();
+                renderAdminTable();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('adminDataTable').innerHTML = '<tr><td colspan="8" style="text-align:center;">❌ Gagal memuat data</td></tr>';
+            }
+        }
+
+        function updateAdminStats() {
+            const total = currentData.length;
+            const menunggu = currentData.filter(d => d.status === 'Menunggu').length;
+            const disetujui = currentData.filter(d => d.status === 'Disetujui').length;
+            const ditolak = currentData.filter(d => d.status === 'Ditolak').length;
+            const dikembalikan = currentData.filter(d => d.status === 'Dikembalikan').length;
+            document.getElementById('adminTotalPermohonan').textContent = total;
+            document.getElementById('adminMenunggu').textContent = menunggu;
+            document.getElementById('adminDisetujui').textContent = disetujui;
+            document.getElementById('adminDitolak').textContent = ditolak;
+            document.getElementById('adminDikembalikan').textContent = dikembalikan;
+        }
+
+        function renderAdminTable() {
+            const tbody = document.getElementById('adminDataTable');
+            if (currentData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Belum ada permohonan</td></tr>';
+                return;
+            }
+            tbody.innerHTML = currentData.map((row, idx) => {
+                let statusClass = '';
+                switch (row.status) {
+                    case 'Menunggu': statusClass = 'status-pending'; break;
+                    case 'Disetujui': statusClass = 'status-approved'; break;
+                    case 'Ditolak': statusClass = 'status-rejected'; break;
+                    case 'Dikembalikan': statusClass = 'status-returned'; break;
+                }
+                return `<tr><td>${idx + 1}</td><td>${row.timestamp}</td><td>${row.nama}</td><td>${row.instansi}</td><td style="max-width: 200px;">${row.kendaraan}</td><td>${row.tanggalAmbil}</td><td><span class="status-badge ${statusClass}">${row.status}</span></td><td><div class="action-buttons"><button class="btn-sm btn-view" onclick="viewDetail(${row.row})">Lihat</button>${row.status === 'Menunggu' ? `<button class="btn-sm btn-approve" onclick="quickApprove(${row.row})">Setujui</button><button class="btn-sm btn-reject" onclick="quickReject(${row.row})">Tolak</button>` : ''}${row.status === 'Disetujui' ? `<button class="btn-sm btn-return" onclick="quickReturn(${row.row})">Kembalikan</button>` : ''}<button class="btn-sm btn-delete" onclick="deleteRow(${row.row})">Hapus</button></div></td></tr>`;
+            }).join('');
+        }
+
+        async function loadVehicleAvailability() {
+            try {
+                const response = await fetch(SCRIPT_URL + '?action=getVehicleStatus');
+                const data = await response.json();
+                if (data.success) {
+                    vehicleAvailability = data.vehicles || {};
+                    ALL_VEHICLES = data.vehicleList || [];
+                    document.getElementById('adminTotalVehicles').textContent = ALL_VEHICLES.length;
+                    renderVehicleCards();
+                }
+            } catch (error) {
+                console.error('Error loading vehicle availability:', error);
+            }
+        }
+
+        function renderVehicleCards() {
+            const grid = document.getElementById('adminVehicleGrid');
+            if (ALL_VEHICLES.length === 0) {
+                grid.innerHTML = '<div style="text-align: center; padding: 2rem; color: #999;">Tidak ada data kendaraan</div>';
+                return;
+            }
+            grid.innerHTML = ALL_VEHICLES.map(vehicle => {
+                const isAvailable = vehicleAvailability[vehicle] !== false;
+                const statusClass = isAvailable ? 'available' : 'unavailable';
+                const statusText = isAvailable ? 'Tersedia' : 'Sedang Dipinjam';
+                const btnText = isAvailable ? '🚫 Tandai Sedang Dipinjam' : '✅ Tandai Tersedia';
+                return `<div class="vehicle-card ${statusClass}"><div style="font-weight: 600; margin-bottom: 0.5rem;">${vehicle}</div><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.5rem;"><span style="width: 12px; height: 12px; border-radius: 50%; background: ${isAvailable ? '#4caf50' : '#f44336'};"></span><span style="font-size: 0.9rem; font-weight: 600;">${statusText}</span></div><button class="btn-sm" style="width: 100%; margin-bottom: 5px; background: ${isAvailable ? '#fff3cd' : '#d4edda'}; color: ${isAvailable ? '#856404' : '#155724'};" onclick="toggleVehicleStatus('${vehicle.replace(/'/g, "\\'")}', ${!isAvailable})">${btnText}</button><button class="btn-sm btn-delete" style="width: 100%;" onclick="deleteVehicle('${vehicle.replace(/'/g, "\\'")}')">🗑️ Hapus Kendaraan</button></div>`;
+            }).join('');
+        }
+
+        async function addVehicle() {
+            const input = document.getElementById('adminNewVehicleName');
+            const vehicleName = input.value.trim();
+            if (!vehicleName) {
+                alert('⚠️ Nama kendaraan tidak boleh kosong!');
+                return;
+            }
+            if (ALL_VEHICLES.includes(vehicleName)) {
+                alert('⚠️ Kendaraan sudah ada dalam daftar!');
+                return;
+            }
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=addVehicle&vehicleName=${encodeURIComponent(vehicleName)}`
+                });
+                const result = await response.json();
+                if (result.success) {
+                    alert('✅ Kendaraan berhasil ditambahkan!');
+                    input.value = '';
+                    loadVehicleAvailability();
+                } else {
+                    alert('❌ Gagal menambahkan kendaraan: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        async function deleteVehicle(vehicleName) {
+            if (!confirm(`Hapus kendaraan "${vehicleName}"?\n\nPerhatian: Tindakan ini tidak dapat dibatalkan!`)) return;
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=deleteVehicle&vehicleName=${encodeURIComponent(vehicleName)}`
+                });
+                const result = await response.json();
+                if (result.success) {
+                    alert('✅ Kendaraan berhasil dihapus!');
+                    loadVehicleAvailability();
+                } else {
+                    alert('❌ Gagal menghapus kendaraan: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        async function toggleVehicleStatus(vehicleName, newStatus) {
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=updateVehicleStatus&vehicle=${encodeURIComponent(vehicleName)}&available=${newStatus}`
+                });
+                const result = await response.json();
+                if (result.success) {
+                    vehicleAvailability[vehicleName] = newStatus;
+                    renderVehicleCards();
+                    alert(`✅ Status kendaraan berhasil diubah menjadi "${newStatus ? 'tersedia' : 'sedang dipinjam'}"`);
+                } else {
+                    alert('❌ Gagal mengubah status kendaraan');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        function viewDetail(row) {
+            selectedRow = row;
+            const data = currentData.find(d => d.row === row);
+            document.getElementById('modalBody').innerHTML = `<div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">${data.timestamp}</div></div><div class="detail-row"><div class="detail-label">Email:</div><div class="detail-value">${data.email}</div></div><div class="detail-row"><div class="detail-label">Nama:</div><div class="detail-value">${data.nama}</div></div><div class="detail-row"><div class="detail-label">KTP:</div><div class="detail-value"><a href="${data.ktpLink}" target="_blank">Lihat KTP</a></div></div><div class="detail-row"><div class="detail-label">Instansi:</div><div class="detail-value">${data.instansi}</div></div><div class="detail-row"><div class="detail-label">Jabatan:</div><div class="detail-value">${data.jabatan}</div></div><div class="detail-row"><div class="detail-label">Kendaraan:</div><div class="detail-value">${data.kendaraan}</div></div><div class="detail-row"><div class="detail-label">Lama Pinjam:</div><div class="detail-value">${data.lamaPinjam}</div></div><div class="detail-row"><div class="detail-label">Tanggal Ambil:</div><div class="detail-value">${data.tanggalAmbil}</div></div><div class="detail-row"><div class="detail-label">Tanggal Kembali:</div><div class="detail-value">${data.tanggalKembali}</div></div><div class="detail-row"><div class="detail-label">Kegiatan:</div><div class="detail-value">${data.kegiatan}</div></div><div class="detail-row"><div class="detail-label">No HP:</div><div class="detail-value">${data.noHp}</div></div><div class="detail-row"><div class="detail-label">Surat Permohonan:</div><div class="detail-value"><a href="${data.suratLink}" target="_blank">Lihat Surat</a></div></div><div class="detail-row"><div class="detail-label">Status:</div><div class="detail-value"><strong>${data.status}</strong></div></div>`;
+            document.getElementById('detailModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').style.display = 'none';
+            selectedRow = null;
+        }
+
+        async function approveRequest() {
+            if (!selectedRow) return;
+            if (!confirm('Setujui permohonan ini?')) return;
+            await updateStatus(selectedRow, 'Disetujui');
+            closeModal();
+        }
+
+        async function rejectRequest() {
+            if (!selectedRow) return;
+            if (!confirm('Tolak permohonan ini?')) return;
+            await updateStatus(selectedRow, 'Ditolak');
+            closeModal();
+        }
+
+        async function returnVehicle() {
+            if (!selectedRow) return;
+            if (!confirm('Tandai kendaraan sudah dikembalikan?')) return;
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=returnVehicle&row=${selectedRow}`
+                });
+                const result = await response.json();
+                if (result.success) {
+                    alert('✅ Kendaraan berhasil dikembalikan!');
+                    loadAdminData();
+                    closeModal();
+                } else {
+                    alert('❌ Gagal: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        async function quickApprove(row) {
+            if (!confirm('Setujui permohonan ini?')) return;
+            await updateStatus(row, 'Disetujui');
+        }
+
+        async function quickReject(row) {
+            if (!confirm('Tolak permohonan ini?')) return;
+            await updateStatus(row, 'Ditolak');
+        }
+
+        async function quickReturn(row) {
+            if (!confirm('Tandai kendaraan sudah dikembalikan?')) return;
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=returnVehicle&row=${row}`
+                });
+                const result = await response.json();
+                if (result.success) {
+                    alert('✅ Kendaraan berhasil dikembalikan!');
+                    loadAdminData();
+                } else {
+                    alert('❌ Gagal: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        async function updateStatus(row, status) {
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=updateStatus&row=${row}&status=${status}`
+                });
+                const result = await response.json();
+                if (result.success) {
+                    alert('✅ Status berhasil diupdate!');
+                    loadAdminData();
+                } else {
+                    alert('❌ Gagal: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        async function deleteRow(row) {
+            if (!confirm('Hapus permohonan ini? Tindakan tidak dapat dibatalkan!')) return;
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=deleteRow&row=${row}`
+                });
+                const result = await response.json();
+                if (result.success) {
+                    alert('✅ Permohonan berhasil dihapus!');
+                    loadAdminData();
+                } else {
+                    alert('❌ Gagal: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        function refreshAdminData() {
+            loadAdminData();
+        }
+
+        function exportToExcel() {
+            if (currentData.length === 0) {
+                alert('Tidak ada data untuk diexport');
+                return;
+            }
+            let csv = 'No,Timestamp,Email,Nama,Instansi,Jabatan,Kendaraan,Lama Pinjam,Tanggal Ambil,Tanggal Kembali,Kegiatan,No HP,Status\n';
+            currentData.forEach((row, i) => {
+                csv += `${i + 1},"${row.timestamp}","${row.email}","${row.nama}","${row.instansi}","${row.jabatan}","${row.kendaraan}","${row.lamaPinjam}","${row.tanggalAmbil}","${row.tanggalKembali}","${row.kegiatan}","${row.noHp}","${row.status}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `Data_Peminjaman_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        window.onclick = function (event) {
+            const modal = document.getElementById('detailModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        setInterval(() => {
+            if (currentUser) {
+                if (currentUser.type === 'admin') {
+                    loadAdminData();
+                } else if (currentUser.type === 'user') {
+                    loadUserData();
+                }
+            }
+        }, 30000);
+    </script>
+</body>
+
+</html>
